@@ -1,0 +1,120 @@
+
+body{
+    overflow-x: hidden;
+}
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://via.placeholder.com/1600x600') center/cover no-repeat;
+    color: #fff;
+    padding: 80px 0;
+    text-align: center;
+}
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+}
+.category-title {
+    margin: 40px 0 20px;
+    border-bottom: 2px solid #009990;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+footer {
+    background: #343a40;
+    color: #fff;
+    padding: 20px 0;
+}
+
+/* login page  css */
+#LOGIN-BODY {
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+  }
+  .login-card h3 {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .form-control {
+    border-radius: 8px;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .signup-text {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+  .signup-text a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  .signup-text a:hover {
+    text-decoration: underline;
+  }
+
+  /* login page  css  end*/
+
+  /* REGISTER PAGE CSS  START */
+  
+
+  #REGISTER-BODY-WRAP {
+    background: linear-gradient(135deg, #f0f4f8, #d9e4f5);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .register-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+  }
+  .register-card h3 {
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+  }
+  .form-control {
+    border-radius: 8px;
+  }
+  .form-label {
+    font-weight: 500;
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .login-link {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  .login-link a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  .login-link a:hover {
+    text-decoration: underline;
+  }

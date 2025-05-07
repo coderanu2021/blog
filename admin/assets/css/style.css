@@ -80,3 +80,54 @@
         transform: translateX(0);
     }
 }
+
+/* header  */
+.header {
+    margin-left: 220px;
+    height: 60px;
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+
+  .profile-icon {
+    cursor: pointer;
+    position: relative;
+  }
+
+  .profile-icon img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+  }
+
+  .dropdown-menu-custom {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    min-width: 150px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+  }
+
+  .dropdown-menu-custom a {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+  }
+
+  .dropdown-menu-custom a:hover {
+    background: #f1f1f1;
+  }
+
+  #PAGE-HEADER{
+    margin-left:40px;
+  }

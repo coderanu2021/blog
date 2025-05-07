@@ -3,55 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title> Blog</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .hero {
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://via.placeholder.com/1600x600') center/cover no-repeat;
-            color: #fff;
-            padding: 80px 0;
-            text-align: center;
-        }
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        .card-img-top {
-            height: 180px;
-            object-fit: cover;
-        }
-        .category-title {
-            margin: 40px 0 20px;
-            border-bottom: 2px solid #009990;
-            display: inline-block;
-            padding-bottom: 5px;
-        }
-        footer {
-            background: #343a40;
-            color: #fff;
-            padding: 20px 0;
-        }
-    </style>
+ <?php  include 'head.php';?>
+
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="#">MyPharmaRex Blog</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Categories</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Login</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
+<?php include 'header.php'; ?>
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
