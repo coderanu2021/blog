@@ -9,7 +9,7 @@ $FETCH_ALL = $userTable->getAllRecord();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - MyPharmaRex Blog</title>
+    <title>All Category - My Blog</title>
     
     <?php include 'head.php'; ?>  
   
@@ -72,6 +72,7 @@ $FETCH_ALL = $userTable->getAllRecord();
                             <th>Title</th>
                             <th>Image</th>
                             <th>Created At</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,6 +86,9 @@ $FETCH_ALL = $userTable->getAllRecord();
                             <td><?php echo htmlspecialchars($row['title']); ?></td>
                             <td><img src="<?php echo htmlspecialchars($row['image']); ?>" width="50" alt="Image" /></td>
                             <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                            <td> <a href="#"><i class="fa fa-edit"></i>
+                            </a>  <a href="#"><i class="fa fa-trash"></i>
+                            </a></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
