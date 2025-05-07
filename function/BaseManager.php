@@ -27,6 +27,18 @@ class BaseManager {
         $stmt->execute($values);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    public function getAllRecord() {
+    
+        // Validate or sanitize the table name
+        $table = preg_replace('/[^a-zA-Z0-9_]/', '', $this->table); // Basic sanitization
+    
+        // Build the query string safely
+        $query = $this->db->prepare("SELECT * FROM `$table`");
+        $query->execute();
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
     
 
 }

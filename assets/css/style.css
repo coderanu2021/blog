@@ -118,3 +118,9 @@ footer {
   .login-link a:hover {
     text-decoration: underline;
   }
+
+  .CIRCULAR_IMAGE{
+    border-radius: 50%;
+    height: 50%;
+    width: 50%;
+  }
