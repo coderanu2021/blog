@@ -18,6 +18,14 @@
   <div class="container">
     <h2>Create a New Blog Post</h2>
     <form id="BLOG_ADD_FORM" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="title" class="form-label">Category</label>
+        <select class="form-control">
+          <option value="">  Select Category </option>
+
+
+        </select>
+      </div>
       <div class="form-group">
         <label for="title" class="form-label">Blog Title</label>
         <input type="text" class="form-control" id="title" placeholder="Enter blog title"  name="title" value="blog title"required>

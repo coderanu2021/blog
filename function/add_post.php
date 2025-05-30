@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             : "User registered, but photo upload failed.";
         echo json_encode(['status' => 1, 'msg' => $msg]);
     } else {
-        echo json_encode(['status' => 0, 'msg' => 'Failed to register user.']);
+        echo json_encode(['status' => 0, 'msg' => 'Failed to add Blog .']);
     }
 }
 ?>
