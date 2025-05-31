@@ -9,11 +9,29 @@ trait CrudTrait {
     }
 
     public function create($data) {
-        $columns = implode(',', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-        $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute($data);
+        try {
+            $columns = implode(',', array_keys($data));
+            $placeholders = ':' . implode(', :', array_keys($data));
+            $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
+            
+            // Debug logging
+            error_log("SQL Query: " . $sql);
+            error_log("Data to insert: " . print_r($data, true));
+            
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute($data);
+            
+            // Debug logging
+            error_log("Insert result: " . ($result ? 'success' : 'failed'));
+            if (!$result) {
+                error_log("PDO Error Info: " . print_r($stmt->errorInfo(), true));
+            }
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function read($conditions = []) {

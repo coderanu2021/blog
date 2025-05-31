@@ -16,14 +16,13 @@ $currentPage = max(1, min($totalPages, $currentPage)); // Ensure the current pag
 $startIndex = ($currentPage - 1) * $perPage;
 $posts = array_slice($FETCH_ALL, $startIndex, $perPage);
 
-// Static categories with blog counts (example data)
-$staticCategories = [
-    'Health' => 10,      // 10 blog posts in the Health category
-    'Technology' => 15,   // 15 blog posts in the Technology category
-    'Lifestyle' => 8,     // 8 blog posts in the Lifestyle category
-    'Fitness' => 5,       // 5 blog posts in the Fitness category
-    'Travel' => 12,       // 12 blog posts in the Travel category
-];
+// Fetch all blogs for category counting
+$blogTable = new BaseManager('tbl_blog');
+$allBlogs = $blogTable->getAllRecord();
+
+// Get categories with blog counts
+$categoryTable = new BaseManager('tbl_blog_category');
+$categories = $categoryTable->getAllRecord();
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +50,7 @@ $staticCategories = [
                         <div class="card-body">
                             <h5 class="card-title"><?php echo $row['title']; ?></h5>
                             <p class="card-text"><?php echo $row['short_desc']; ?></p>
-                            <a href="blog?id=<?php $row['title']; ?>" class="btn btn-outline-primary btn-sm">Read More</a>
+                            <a href="blog?id=<?php echo $row['id']; ?>" class="btn btn-outline-primary btn-sm">Read More</a>
                         </div>
                     </div>
                 </div>
@@ -82,16 +81,21 @@ $staticCategories = [
             </nav>
         </div>
 
-        <!-- Sidebar: Static Categories with post counts -->
+        <!-- Sidebar: Categories with post counts -->
         <div class="col-lg-4 col-md-5 col-sm-12">
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Categories</h5>
                     <ul class="list-group">
-                        <?php foreach ($staticCategories as $category => $count): ?>
+                        <?php foreach ($categories as $cat): 
+                            // Count blogs in this category
+                            $blogCount = count(array_filter($allBlogs, function($blog) use ($cat) {
+                                return $blog['category_id'] == $cat['id'];
+                            }));
+                        ?>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="#" class="text-decoration-none"><?php echo $category; ?></a>
-                                <span class="badge bg-primary rounded-pill"><?php echo $count; ?></span>
+                                <a href="category?id=<?php echo $cat['id']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($cat['name']); ?></a>
+                                <span class="badge bg-primary rounded-pill"><?php echo $blogCount; ?></span>
                             </li>
                         <?php endforeach; ?>
                     </ul>

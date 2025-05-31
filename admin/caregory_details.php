@@ -1,145 +1,228 @@
-<?php 
-require_once '../function/BaseManager.php';
-$userTable = new BaseManager('tbl_blog_category');
-$FETCH_ALL = $userTable->getAllRecord();
+<?php
+require_once '../function/config.php';
+require_once 'head.php';
+require_once 'header.php';
+require_once 'sidebar.php';
+
+// Get all categories
+$sql = "SELECT * FROM tbl_blog_category ORDER BY name";
+$result = mysqli_query($conn, $sql);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All Category - My Blog</title>
-    
-    <?php include 'head.php'; ?>  
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
-
-  
-</head>
-
-<body>
-<?php include 'header.php'; ?>
-<?php include 'sidebar.php'; ?>
-
-<div class="content">
-    <div class="container-fluid">
-        <!-- Add New Post Button -->
-        <button type="button" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Add New Category
-        </button>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add Blog Category</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <!-- Example Form (customize as needed) -->
-                <form id="ADD_CATEGORY" enctype="multipart/form-data">
-                <div class="mb-3">
-                        <label for="categoryTitle" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="categoryTitle" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="imageURL" class="form-label">Image URL</label>
-                        <input type="file" class="form-control" id="imageURL" name="image" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </form>
-              </div>
-              
-            </div>
-          </div>
-        </div>
-        <div class="position-fixed top-0 end-0" style="z-index: 1050">
-            <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="toastBody">Message</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Categories</h1>
+                </div>
+                <div class="col-sm-6">
+                    <button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#addCategoryModal">
+                        <i class="fas fa-plus"></i> Add New Category
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Blog Posts Table -->
-        <div class="card">
-            <div class="card-header">All Blog Categories</div>
-            <div class="card-body">
-                <table id="example" class="display table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Sno</th>
-                            <th>Title</th>
-                            <th>Image</th>
-                            <th>Created At</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php  
-                        $i = 0;
-                        foreach($FETCH_ALL as $row): 
-                            $i++;
-                        ?>
-                        <tr>
-                            <td><?php echo $i; ?></td>
-                            <td><?php echo htmlspecialchars($row['name']); ?></td>
-                            <td><img src="<?php echo htmlspecialchars($row['image']); ?>" width="50" alt="Image" /></td>
-                            <td><?php echo htmlspecialchars($row['created_at']); ?></td>
-                            <td><a href="#"><i class="fa fa-edit"></i>
-                            </a><a href="#"><i class="fa fa-trash"></i>
-                            </a></td>
-                        
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">All Categories</h3>
+                        </div>
+                        <div class="card-body">
+                            <table id="categoriesTable" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Image</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php while($row = mysqli_fetch_assoc($result)) { ?>
+                                    <tr>
+                                        <td><?php echo $row['id']; ?></td>
+                                        <td><?php echo $row['name']; ?></td>
+                                        <td>
+                                            <?php if($row['image']) { ?>
+                                                <img src="../<?php echo $row['image']; ?>" alt="Category Image" style="max-width: 100px;">
+                                            <?php } ?>
+                                        </td>
+                                        <td><?php echo date('d M Y', strtotime($row['created_at'])); ?></td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-sm edit-category" 
+                                                    data-id="<?php echo $row['id']; ?>"
+                                                    data-name="<?php echo $row['name']; ?>"
+                                                    data-image="<?php echo $row['image']; ?>">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm delete-category" data-id="<?php echo $row['id']; ?>">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </section>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="addCategoryForm" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category Image</label>
+                        <input type="file" class="form-control" name="image">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<?php include 'script.php'; ?>
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" role="dialog" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editCategoryForm" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="edit_category_id">
+                    <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" class="form-control" name="name" id="edit_category_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category Image</label>
+                        <div id="current_image" class="mb-2"></div>
+                        <input type="file" class="form-control" name="image">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
-    $(document).ready(function() {
-    // Handle form submission
-    $('#ADD_CATEGORY').on('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
-
-        // Create FormData object to handle file uploads
+$(document).ready(function() {
+    $('#categoriesTable').DataTable();
+    
+    // Add Category Form Submit
+    $('#addCategoryForm').submit(function(e) {
+        e.preventDefault();
         var formData = new FormData(this);
-
+        
         $.ajax({
-            url: '../function/add_category.php', // Path to your PHP file
+            url: 'ajax/add_category.php',
             type: 'POST',
             data: formData,
-            contentType: false, // Required for file uploads
-            processData: false, // Required for file uploads
-            dataType: 'json',
+            processData: false,
+            contentType: false,
             success: function(response) {
-                // Show toast message
-                $('#toastBody').text(response.msg);
-                $('#toastMessage').toast({ delay: 3000 }).toast('show');
-
-                if (response.status === 1) {
-                    // Optionally, reload the page or update the table dynamically
-                    setTimeout(function() {
-                        location.reload(); // Reload to show new category
-                    }, 2000);
+                if(response.success) {
+                    location.reload();
+                } else {
+                    alert('Error adding category');
                 }
-            },
-            error: function(xhr, status, error) {
-                // Handle errors
-                $('#toastBody').text('An error occurred: ' + error);
-                $('#toastMessage').removeClass('bg-success').addClass('bg-danger').toast({ delay: 3000 }).toast('show');
             }
         });
     });
+    
+    // Edit Category Click
+    $('.edit-category').click(function() {
+        var id = $(this).data('id');
+        var name = $(this).data('name');
+        var image = $(this).data('image');
+        
+        $('#edit_category_id').val(id);
+        $('#edit_category_name').val(name);
+        
+        if(image) {
+            $('#current_image').html('<img src="../' + image + '" alt="Category Image" style="max-width: 200px;">');
+        } else {
+            $('#current_image').html('');
+        }
+        
+        $('#editCategoryModal').modal('show');
+    });
+    
+    // Edit Category Form Submit
+    $('#editCategoryForm').submit(function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        
+        $.ajax({
+            url: 'ajax/edit_category.php',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if(response.success) {
+                    location.reload();
+                } else {
+                    alert('Error updating category');
+                }
+            }
+        });
+    });
+    
+    // Delete Category Click
+    $('.delete-category').click(function() {
+        if(confirm('Are you sure you want to delete this category?')) {
+            var categoryId = $(this).data('id');
+            $.ajax({
+                url: 'ajax/delete_category.php',
+                type: 'POST',
+                data: {id: categoryId},
+                success: function(response) {
+                    if(response.success) {
+                        location.reload();
+                    } else {
+                        alert('Error deleting category');
+                    }
+                }
+            });
+        }
+    });
 });
 </script>
-</body>
-</html>
+
+<?php require_once 'script.php'; ?>

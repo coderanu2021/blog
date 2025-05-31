@@ -1,9 +1,36 @@
+<?php
+require_once 'function/BaseManager.php';
+
+// Get blog ID from URL
+$blog_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+// Fetch blog details
+$blogTable = new BaseManager('tbl_blog');
+$blog = $blogTable->getRecordById($blog_id);
+
+// If blog not found, redirect to all blogs page
+if (!$blog) {
+    header('Location: all_blogs.php');
+    exit();
+}
+
+// Fetch category details
+$categoryTable = new BaseManager('tbl_blog_category');
+$category = $categoryTable->getRecordById($blog['category_id']);
+
+// Fetch author details if user_id exists
+$author = null;
+if ($blog['user_id']) {
+    $userTable = new BaseManager('tbl_user');
+    $author = $userTable->getRecordById($blog['user_id']);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Blog Details Page</title>
+  <title><?php echo htmlspecialchars($blog['title']); ?> - MyPharmaRex Blog</title>
   <?php include 'head.php'; ?>
   <style>
     * {
@@ -190,11 +217,16 @@
     <div class="main-content">
       <!-- Blog Post -->
       <article class="blog-post">
-        <img src="https://via.placeholder.com/800x400" alt="Blog Image">
-        <h1>How to Build a Comment & Reply System</h1>
-        <p class="author">By Jane Doe • May 7, 2025</p>
+        <img src="<?php echo htmlspecialchars($blog['image']); ?>" alt="<?php echo htmlspecialchars($blog['title']); ?>">
+        <h1><?php echo htmlspecialchars($blog['title']); ?></h1>
+        <p class="author">
+          <?php if ($author): ?>
+            By <?php echo htmlspecialchars($author['name']); ?> • 
+          <?php endif; ?>
+          <?php echo date('F j, Y', strtotime($blog['created_at'])); ?>
+        </p>
         <div class="blog-body">
-          <p>This blog explains how to create a clean comment and reply structure using only HTML, CSS, and JavaScript. You'll learn how to handle nested replies and build a threaded discussion UI.</p>
+          <?php echo $blog['long_desc']; ?>
         </div>
       </article>
 
@@ -219,11 +251,12 @@
       <div class="categories">
         <h3>Blog Categories</h3>
         <ul>
-          <li><a href="#">Web Development</a></li>
-          <li><a href="#">JavaScript</a></li>
-          <li><a href="#">Frontend Design</a></li>
-          <li><a href="#">Database Systems</a></li>
-          <li><a href="#">Best Practices</a></li>
+          <?php
+          $categoryTable = new BaseManager('tbl_blog_category');
+          $categories = $categoryTable->getAllRecord();
+          foreach ($categories as $cat): ?>
+            <li><a href="category?id=<?php echo $cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></a></li>
+          <?php endforeach; ?>
         </ul>
       </div>
     </aside>
