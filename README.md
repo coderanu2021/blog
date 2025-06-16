@@ -13,6 +13,7 @@ A modern, feature-rich blog system built with PHP that allows users to read, com
 
 - **User Features**
   - User registration and authentication
+  - Email verification system
   - Comment system with moderation
   - User profiles
   - Session management
@@ -34,6 +35,8 @@ A modern, feature-rich blog system built with PHP that allows users to read, com
 - MySQL/MariaDB
 - Web server (Apache/Nginx)
 - WAMP/XAMPP/MAMP (for local development)
+- PHPMailer (for email functionality)
+- Composer (for dependency management)
 
 ## Directory Structure
 
@@ -99,7 +102,10 @@ blog/
 3. **Configuration**
    - Update database credentials
    - Configure upload paths for images
-   - Set up email settings (if required)
+   - Set up email settings in `function/email_verification.php`:
+     - Configure SMTP settings
+     - Set up sender email and password
+     - Update email templates if needed
 
 ## Usage
 

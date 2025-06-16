@@ -1,6 +1,7 @@
 <?php
 require_once '../function/BaseManager.php';
 require_once '../function/ImageManager.php';
+require_once '../function/subscriber_manager.php';
 
 // Check if user is logged in and is admin
 session_start();
@@ -48,7 +49,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($error)) {
-            if ($blogTable->insert($data)) {
+            $insertResult = $blogTable->insert($data);
+            if ($insertResult) {
+                // Get the newly created blog post
+                $newBlog = $blogTable->getOne(['id' => $insertResult]);
+                
+                // Notify subscribers if blog is approved
+                if ($newBlog['status'] == 1) {
+                    $subscriberManager = new SubscriberManager();
+                    $subscriberManager->notifySubscribers($newBlog);
+                }
+                
                 $message = 'Blog post added successfully';
                 // Clear form data
                 $title = $meta_title = $short_desc = $long_desc = '';
@@ -126,7 +137,7 @@ $categories = $categoryTable->getAllRecord();
     <div class="row">
         <?php include 'sidebar.php' ?>
 
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="margin-left:260px;">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2">Add New Blog Post</h1>
             </div>
@@ -202,12 +213,10 @@ function previewImage(input) {
             preview.style.display = 'block';
         }
         reader.readAsDataURL(input.files[0]);
-    } else {
-        preview.style.display = 'none';
     }
 }
 </script>
 
-<?php include 'script.php' ?>
+<?php require_once 'footer.php'; ?>
 </body>
 </html>

@@ -25,6 +25,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Check if email is verified
+    if (!$user['is_verified']) {
+        echo json_encode(['status' => 0, 'msg' => 'Please verify your email address before logging in.']);
+        exit;
+    }
+
     // Save login to session
     $_SESSION['user_id']   = $user['id'];
     $_SESSION['user_name'] = $user['name'];

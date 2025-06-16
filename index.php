@@ -128,9 +128,37 @@ $categories = mysqli_query($conn, $sql);
 document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const email = this.querySelector('input[type="email"]').value;
+    const messageDiv = this.querySelector('.subscription-message') || document.createElement('div');
+    messageDiv.className = 'subscription-message mt-2';
+    
     if(email) {
-        alert('Thank you for subscribing to our newsletter!');
-        this.reset();
+        fetch('function/subscribe.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(email)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 1) {
+                messageDiv.className = 'subscription-message mt-2 alert alert-success';
+                this.reset();
+            } else {
+                messageDiv.className = 'subscription-message mt-2 alert alert-danger';
+            }
+            messageDiv.textContent = data.msg;
+            if (!this.contains(messageDiv)) {
+                this.appendChild(messageDiv);
+            }
+        })
+        .catch(error => {
+            messageDiv.className = 'subscription-message mt-2 alert alert-danger';
+            messageDiv.textContent = 'An error occurred. Please try again later.';
+            if (!this.contains(messageDiv)) {
+                this.appendChild(messageDiv);
+            }
+        });
     }
 });
 

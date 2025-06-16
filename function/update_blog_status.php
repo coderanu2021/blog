@@ -2,6 +2,7 @@
 session_start();
 require_once 'BaseManager.php';
 require_once 'send_email.php';
+require_once 'subscriber_manager.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $blog_id = $_POST['blog_id'] ?? '';
@@ -57,8 +58,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>Best regards,<br>Blog Admin Team</p>
         ";
 
-        // Send email notification
+        // Send email notification to author
         $emailSent = sendEmail($user['email'], $subject, $body);
+
+        // If blog is approved, notify subscribers
+        if ($new_status == '1') {
+            $subscriberManager = new SubscriberManager();
+            $subscriberManager->notifySubscribers($blog);
+        }
 
         $response = [
             'status' => 1,

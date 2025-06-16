@@ -24,11 +24,12 @@
                         <a href="#"><i class="fab fa-linkedin"></i></a>
                     </div>
                     <p class="mt-3">Subscribe to our newsletter for updates</p>
-                    <form class="mt-2">
+                    <form class="mt-2 newsletter-form">
                         <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Enter your email">
+                            <input type="email" class="form-control" placeholder="Enter your email" required>
                             <button class="btn btn-primary" type="submit">Subscribe</button>
                         </div>
+                        <div class="subscription-message mt-2" style="display: none;"></div>
                     </form>
                 </div>
             </div>
@@ -60,12 +61,35 @@
         });
 
         // Newsletter subscription
-        document.querySelector('.footer form').addEventListener('submit', function(e) {
+        document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const email = this.querySelector('input[type="email"]').value;
+            const messageDiv = this.querySelector('.subscription-message');
+            
             if(email) {
-                alert('Thank you for subscribing to our newsletter!');
-                this.reset();
+                fetch('function/subscribe.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'email=' + encodeURIComponent(email)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    messageDiv.style.display = 'block';
+                    if (data.status === 1) {
+                        messageDiv.className = 'subscription-message mt-2 alert alert-success';
+                        this.reset();
+                    } else {
+                        messageDiv.className = 'subscription-message mt-2 alert alert-danger';
+                    }
+                    messageDiv.textContent = data.msg;
+                })
+                .catch(error => {
+                    messageDiv.style.display = 'block';
+                    messageDiv.className = 'subscription-message mt-2 alert alert-danger';
+                    messageDiv.textContent = 'An error occurred. Please try again later.';
+                });
             }
         });
     </script>

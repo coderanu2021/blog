@@ -2,6 +2,7 @@
 session_start();
 require_once 'BaseManager.php';
 require_once 'config.php';
+require_once 'subscriber_manager.php';
 
 $fileStatus = false;
 
@@ -13,13 +14,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category_id    = $_POST['category_id'] ?? '';
     $photo    = $_FILES['image'] ?? null;
 
-
     if (!$title || !$metaTitle || !$metaDesc || !$description || !$category_id || !$photo) {
         echo json_encode(['status' => 0, 'msg' => 'All fields are required.']);
         exit;
     }
-
-  
 
     // Upload profile photo
     $photoPath = null;
@@ -54,6 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
 
     if ($insertResult) {
+        // Get the newly created blog post
+        $newBlog = $blogTable->getOne(['id' => $insertResult]);
+        
+        // Notify subscribers if blog is approved
+        if ($newBlog['status'] == BLOG_STATUS_APPROVED) {
+            $subscriberManager = new SubscriberManager();
+            $subscriberManager->notifySubscribers($newBlog);
+        }
+
         $msg = $fileStatus 
             ? "Blog post submitted successfully! It will be reviewed by an admin." 
             : "Blog post submitted, but photo upload failed.";
