@@ -50,7 +50,7 @@ if (isset($_SESSION['user_id'])) {
       <button type="submit" class="btn btn-primary">Register</button>
     </form>
     <div class="login-link">
-      Already have an account? <a href="#">Login</a>
+      Already have an account? <a href="login.php">Login</a>
     </div>
   </div>
 

@@ -22,14 +22,14 @@ $(document).ready(function() {
             $("#toastMessage").removeClass("bg-danger").addClass("bg-success");
             $("#toastBody").text(responseData.msg);
             toast.show();
-          //  $("#registerForm")[0].reset();
+            $("#registerForm")[0].reset();
           } else {
             $("#toastMessage").removeClass("bg-success").addClass("bg-danger");
             $("#toastBody").text(responseData.msg || "Something went wrong.");
             toast.show();
-            // setTimeout(() => {
-            //     window.location.href = "login.php"; // redirect on success
-            //   }, 1500);
+            setTimeout(() => {
+                window.location.href = "login.php"; // redirect on success
+              }, 1500);
           }
 
         } catch (e) {
