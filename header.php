@@ -59,7 +59,7 @@ $categories = mysqli_query($conn, $sql);
                                         <li><a class="dropdown-item" href="admin/dashboard.php">Admin Panel</a></li>
                                     <?php } ?>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                                    <li><a class="dropdown-item" href="admin/logout.php">Logout</a></li>
                                 </ul>
                             </li>
                         <?php } else { ?>
