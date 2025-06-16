@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'function/BaseManager.php';
 
 // Get category ID from URL
@@ -16,125 +17,294 @@ echo "<!-- Debug Info: Category Data: ";
 print_r($category);
 echo " -->";
 
-// If category not found, redirect to all blogs page
+// If category not found, redirect to all categories page
 if (!$category) {
-    header('Location: all_blogs.php');
+    header('Location: all_categories.php');
     exit();
 }
 
-// Fetch blogs for this category
+// Fetch blogs in this category
 $blogTable = new BaseManager('tbl_blog');
-$FETCH_ALL = $blogTable->getAllRecord();
+$blogs = $blogTable->getRecordsByField('category_id', $category_id, 'created_at DESC');
 
-// Filter blogs by category
-$category_blogs = array_filter($FETCH_ALL, function($blog) use ($category_id) {
-    return $blog['category_id'] == $category_id;
-});
-
-// Pagination logic
-$perPage = 8; // Number of posts per page
-$totalPosts = count($category_blogs);
-$totalPages = ceil($totalPosts / $perPage);
-
-// Get current page from URL, default is 1
-$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$currentPage = max(1, min($totalPages, $currentPage)); // Ensure the current page is valid
-
-$startIndex = ($currentPage - 1) * $perPage;
-$posts = array_slice($category_blogs, $startIndex, $perPage);
+// Get category name safely
+$categoryName = isset($category['name']) ? $category['name'] : 'Unnamed Category';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title><?php echo htmlspecialchars($category['name'] ?? 'Category Not Found'); ?> - MyPharmaRex Blog</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title><?php echo htmlspecialchars($categoryName); ?> - MyPharmaRex Blog</title>
     <?php include 'head.php'; ?>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            padding: 60px 0;
+            margin-bottom: 50px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="rgba(255,255,255,0.1)"/></svg>');
+            opacity: 0.1;
+        }
+
+        .category-image {
+            max-width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .category-header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .blog-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .blog-image {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .blog-card:hover .blog-image {
+            transform: scale(1.05);
+        }
+
+        .blog-content {
+            padding: 25px;
+        }
+
+        .blog-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        .blog-title a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .blog-title a:hover {
+            color: #4f46e5;
+        }
+
+        .blog-meta {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blog-meta span {
+            display: flex;
+            align-items: center;
+        }
+
+        .blog-meta span::before {
+            content: '•';
+            margin-right: 10px;
+            color: #4f46e5;
+        }
+
+        .blog-meta span:first-child::before {
+            display: none;
+        }
+
+        .blog-excerpt {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .read-more {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .no-blogs {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .no-blogs h2 {
+            font-size: 1.8em;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+        }
+
+        .no-blogs p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .category-header {
+                padding: 40px 0;
+            }
+
+            .category-header h1 {
+                font-size: 2em;
+            }
+
+            .blog-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .blog-card {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+    </style>
 </head>
 <body>
-    <?php include 'header.php'; ?>
+<?php include 'header.php' ?>
 
-    <!-- Blog List Section -->
-    <div class="container my-5">
-        <h1 class="mb-4"><?php echo htmlspecialchars($category['name'] ?? 'Category Not Found'); ?></h1>
-        <div class="row">
-            <!-- Blog Posts -->
-            <div class="col-lg-8 col-md-7 col-sm-12">
-                <div class="row">
-                    <?php if (empty($posts)): ?>
-                        <div class="col-12">
-                            <p>No blogs found in this category.</p>
-                        </div>
-                    <?php else: ?>
-                        <?php foreach($posts as $row): ?>
-                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
-                            <div class="card">
-                                <img src="<?php echo htmlspecialchars($row['image'] ?? ''); ?>" class="card-img-top" alt="Blog Image">
-                                <div class="card-body">
-                                    <h5 class="card-title"><?php echo htmlspecialchars($row['title'] ?? ''); ?></h5>
-                                    <p class="card-text"><?php echo htmlspecialchars($row['short_desc'] ?? ''); ?></p>
-                                    <a href="blog?id=<?php echo $row['id']; ?>" class="btn btn-outline-primary btn-sm">Read More</a>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <?php if ($currentPage > 1): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?id=<?php echo $category_id; ?>&page=<?php echo $currentPage - 1; ?>">Previous</a>
-                            </li>
-                        <?php endif; ?>
-
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                                <a class="page-link" href="?id=<?php echo $category_id; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                            </li>
-                        <?php endfor; ?>
-
-                        <?php if ($currentPage < $totalPages): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?id=<?php echo $category_id; ?>&page=<?php echo $currentPage + 1; ?>">Next</a>
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
-                <?php endif; ?>
-            </div>
-
-            <!-- Sidebar: Categories -->
-            <div class="col-lg-4 col-md-5 col-sm-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Categories</h5>
-                        <ul class="list-group">
-                            <?php
-                            $categories = $categoryTable->getAllRecord();
-                            foreach ($categories as $cat): 
-                                // Count blogs in this category
-                                $blogCount = count(array_filter($FETCH_ALL, function($blog) use ($cat) {
-                                    return $blog['category_id'] == $cat['id'];
-                                }));
-                            ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <a href="category?id=<?php echo $cat['id']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($cat['name'] ?? ''); ?></a>
-                                    <span class="badge bg-primary rounded-pill"><?php echo $blogCount; ?></span>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="category-header">
+    <div class="container">
+        <?php if (isset($category['image']) && !empty($category['image'])): ?>
+            <img src="<?php echo htmlspecialchars($category['image']); ?>" 
+                 alt="<?php echo htmlspecialchars($categoryName); ?>"
+                 class="category-image">
+        <?php endif; ?>
+        <h1><?php echo htmlspecialchars($categoryName); ?></h1>
     </div>
+</div>
 
-    <?php include 'footer.php'; ?>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<div class="container">
+    <div class="blog-grid">
+        <?php if (!empty($blogs)): ?>
+            <?php foreach ($blogs as $blog): 
+                $author = null;
+                if (isset($blog['user_id']) && !empty($blog['user_id'])) {
+                    $userTable = new BaseManager('tbl_user');
+                    $author = $userTable->getRecordById($blog['user_id']);
+                }
+            ?>
+                <article class="blog-card">
+                    <?php if (isset($blog['image']) && !empty($blog['image'])): ?>
+                        <img src="<?php echo htmlspecialchars($blog['image']); ?>" 
+                             alt="<?php echo htmlspecialchars($blog['title'] ?? 'Blog Post'); ?>"
+                             class="blog-image">
+                    <?php endif; ?>
+                    
+                    <div class="blog-content">
+                        <h2 class="blog-title">
+                            <a href="blog.php?id=<?php echo $blog['id']; ?>">
+                                <?php echo htmlspecialchars($blog['title'] ?? 'Untitled Post'); ?>
+                            </a>
+                        </h2>
+                        
+                        <div class="blog-meta">
+                            <?php if ($author && isset($author['name'])): ?>
+                                <span>By <?php echo htmlspecialchars($author['name']); ?></span>
+                            <?php endif; ?>
+                            <?php if (isset($blog['created_at'])): ?>
+                                <span><?php echo date('F j, Y', strtotime($blog['created_at'])); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="blog-excerpt">
+                            <?php 
+                            $excerpt = isset($blog['short_desc']) ? $blog['short_desc'] : '';
+                            echo htmlspecialchars(substr($excerpt, 0, 150)) . (strlen($excerpt) > 150 ? '...' : ''); 
+                            ?>
+                        </div>
+                        
+                        <a href="blog.php?id=<?php echo $blog['id']; ?>" class="read-more">
+                            Read More
+                        </a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="no-blogs">
+                <h2>No blogs found in this category yet.</h2>
+                <p>Check back later for new content!</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<?php include 'footer.php' ?>
 </body>
 </html>

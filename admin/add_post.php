@@ -1,143 +1,213 @@
 <?php
-require_once '../function/config.php';
-require_once 'head.php';
-require_once 'header.php';
-require_once 'sidebar.php';
+require_once '../function/BaseManager.php';
+require_once '../function/ImageManager.php';
 
-// Get all categories
-$sql = "SELECT * FROM tbl_blog_category ORDER BY name";
-$categories = mysqli_query($conn, $sql);
+// Check if user is logged in and is admin
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ../login.php');
+    exit();
+}
 
-if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $title = mysqli_real_escape_string($conn, $_POST['title']);
-    $meta_title = mysqli_real_escape_string($conn, $_POST['meta_title']);
-    $short_desc = mysqli_real_escape_string($conn, $_POST['short_desc']);
-    $long_desc = mysqli_real_escape_string($conn, $_POST['long_desc']);
-    $category_id = mysqli_real_escape_string($conn, $_POST['category_id']);
-    $status = mysqli_real_escape_string($conn, $_POST['status']);
-    $user_id = $_SESSION['user_id']; // Assuming you have user session
-    
-    // Handle image upload
-    $image = '';
-    if(isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $target_dir = "../uploads/posts/";
-        if(!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        
-        $file_extension = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
-        $new_filename = uniqid() . '.' . $file_extension;
-        $target_file = $target_dir . $new_filename;
-        
-        if(move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            $image = 'uploads/posts/' . $new_filename;
-        }
-    }
-    
-    $sql = "INSERT INTO tbl_blog (title, meta_title, short_desc, long_desc, category_id, user_id, status, image, created_at) 
-            VALUES ('$title', '$meta_title', '$short_desc', '$long_desc', '$category_id', '$user_id', '$status', '$image', NOW())";
-            
-    if(mysqli_query($conn, $sql)) {
-        $success = "Post added successfully!";
-        // Clear form data
-        $_POST = array();
+$message = '';
+$error = '';
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $title = $_POST['title'] ?? '';
+    $meta_title = $_POST['meta_title'] ?? '';
+    $short_desc = $_POST['short_desc'] ?? '';
+    $long_desc = $_POST['long_desc'] ?? '';
+    $category_id = $_POST['category_id'] ?? '';
+    $status = $_POST['status'] ?? 1;
+
+    if (empty($title) || empty($short_desc) || empty($long_desc) || empty($category_id)) {
+        $error = 'All fields are required';
     } else {
-        $error = "Error adding post!";
+        $blogTable = new BaseManager('tbl_blog');
+        $imageManager = new ImageManager();
+
+        $data = [
+            'title' => $title,
+            'meta_title' => $meta_title,
+            'short_desc' => $short_desc,
+            'long_desc' => $long_desc,
+            'category_id' => $category_id,
+            'user_id' => $_SESSION['user_id'],
+            'status' => $status
+        ];
+
+        // Handle image upload
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $uploadResult = $imageManager->uploadImage($_FILES['image'], 'blog');
+            if ($uploadResult['success']) {
+                $data['image'] = $uploadResult['path'];
+            } else {
+                $error = $uploadResult['message'];
+            }
+        }
+
+        if (empty($error)) {
+            if ($blogTable->insert($data)) {
+                $message = 'Blog post added successfully';
+                // Clear form data
+                $title = $meta_title = $short_desc = $long_desc = '';
+                $category_id = '';
+                $status = 1;
+            } else {
+                $error = 'Failed to add blog post';
+            }
+        }
     }
 }
+
+// Fetch categories for dropdown
+$categoryTable = new BaseManager('tbl_blog_category');
+$categories = $categoryTable->getAllRecord();
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Blog Post - Admin Panel</title>
+    <?php include 'head.php'; ?>
+    <style>
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Add New Blog Post</h1>
-                </div>
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+        }
+
+        .image-preview {
+            max-width: 300px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+<?php include 'header.php' ?>
+
+<div class="container-fluid">
+    <div class="row">
+        <?php include 'sidebar.php' ?>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Add New Blog Post</h1>
             </div>
-        </div>
+
+            <?php if ($message): ?>
+                <div class="alert alert-success"><?php echo $message; ?></div>
+            <?php endif; ?>
+
+            <?php if ($error): ?>
+                <div class="alert alert-danger"><?php echo $error; ?></div>
+            <?php endif; ?>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($title ?? ''); ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="meta_title">Meta Title</label>
+                    <input type="text" class="form-control" id="meta_title" name="meta_title" value="<?php echo htmlspecialchars($meta_title ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label for="short_desc">Short Description</label>
+                    <textarea class="form-control" id="short_desc" name="short_desc" required><?php echo htmlspecialchars($short_desc ?? ''); ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="long_desc">Long Description</label>
+                    <textarea class="form-control" id="long_desc" name="long_desc" required><?php echo htmlspecialchars($long_desc ?? ''); ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="category_id">Category</label>
+                    <select class="form-control" id="category_id" name="category_id" required>
+                        <option value="">Select Category</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?php echo $category['id']; ?>" <?php echo (isset($category_id) && $category_id == $category['id']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Featured Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/*" onchange="previewImage(this)">
+                    <img id="imagePreview" class="image-preview" src="#" alt="Image Preview">
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="1" <?php echo (isset($status) && $status == 1) ? 'selected' : ''; ?>>Active</option>
+                        <option value="0" <?php echo (isset($status) && $status == 0) ? 'selected' : ''; ?>>Inactive</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Blog Post</button>
+            </form>
+        </main>
     </div>
-
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Add New Post</h3>
-                        </div>
-                        <div class="card-body">
-                            <?php if(isset($success)) { ?>
-                                <div class="alert alert-success"><?php echo $success; ?></div>
-                            <?php } ?>
-                            <?php if(isset($error)) { ?>
-                                <div class="alert alert-danger"><?php echo $error; ?></div>
-                            <?php } ?>
-                            
-                            <form method="POST" enctype="multipart/form-data">
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" class="form-control" name="title" value="<?php echo isset($_POST['title']) ? $_POST['title'] : ''; ?>" required>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Meta Title</label>
-                                    <input type="text" class="form-control" name="meta_title" value="<?php echo isset($_POST['meta_title']) ? $_POST['meta_title'] : ''; ?>">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Category</label>
-                                    <select class="form-control" name="category_id" required>
-                                        <option value="">Select Category</option>
-                                        <?php while($category = mysqli_fetch_assoc($categories)) { ?>
-                                            <option value="<?php echo $category['id']; ?>" <?php echo (isset($_POST['category_id']) && $_POST['category_id'] == $category['id']) ? 'selected' : ''; ?>>
-                                                <?php echo $category['name']; ?>
-                                            </option>
-                                        <?php } ?>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Short Description</label>
-                                    <textarea class="form-control" name="short_desc" rows="3"><?php echo isset($_POST['short_desc']) ? $_POST['short_desc'] : ''; ?></textarea>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Long Description</label>
-                                    <textarea class="form-control" name="long_desc" id="editor" rows="10"><?php echo isset($_POST['long_desc']) ? $_POST['long_desc'] : ''; ?></textarea>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select class="form-control" name="status">
-                                        <option value="1" <?php echo (isset($_POST['status']) && $_POST['status'] == '1') ? 'selected' : ''; ?>>Published</option>
-                                        <option value="0" <?php echo (isset($_POST['status']) && $_POST['status'] == '0') ? 'selected' : ''; ?>>Draft</option>
-                                        <option value="2" <?php echo (isset($_POST['status']) && $_POST['status'] == '2') ? 'selected' : ''; ?>>Archived</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label>Featured Image</label>
-                                    <input type="file" class="form-control" name="image">
-                                </div>
-                                
-                                <button type="submit" class="btn btn-primary">Add Post</button>
-                                <a href="post_details.php" class="btn btn-default">Cancel</a>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 </div>
 
 <script>
-ClassicEditor
-    .create(document.querySelector('#editor'))
-    .catch(error => {
-        console.error(error);
-    });
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.style.display = 'none';
+    }
+}
 </script>
 
-<?php require_once 'script.php'; ?>
+<?php include 'script.php' ?>
+</body>
+</html>

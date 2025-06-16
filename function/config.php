@@ -1,4 +1,12 @@
 <?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include constants
+require_once __DIR__ . '/constants.php';
+
 // Database configuration
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');     // Default WAMP username
@@ -15,9 +23,4 @@ if (!$conn) {
 
 // Set charset to utf8
 mysqli_set_charset($conn, "utf8");
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 ?> 

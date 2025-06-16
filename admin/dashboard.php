@@ -1,3 +1,13 @@
+<?php
+require_once '../function/config.php';
+require_once '../function/admin_auth.php';
+
+// Check admin authentication
+checkAdminAuth();
+
+// Get admin data
+$admin = getAdminData();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +15,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - MyPharmaRex Blog</title>
     <?php include 'head.php'; ?>   
+    <style>
+        .content {
+    margin-left: 260px;
+}
+    </style>
 </head>
 <body>
     <?php include 'header.php'; ?>
@@ -13,68 +28,67 @@
     <!-- Main Content -->
     <div class="content">
         <div class="container-fluid">
-            <h1 class="mb-4">Manage Blog Posts</h1>
+            <h1 class="mb-4">Manage Dashboard</h1>
             
-            <!-- Add New Post Button -->
-            <div class="mb-4 text-end">
-                <a href="#" class="btn btn-add-new">Add New Post</a>
-            </div>
-            
-            <!-- Post Management Card -->
-            <div class="card">
-                <div class="card-header">All Blog Posts</div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Author</th>
-                                    <th>Category</th>
-                                    <th>Status</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="blogList">
-                                <!-- Blog posts will be loaded here -->
-                            </tbody>
-                        </table>
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Users</h5>
+                            <h2 class="card-text" id="totalUsers">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Blogs</h5>
+                            <h2 class="card-text" id="totalBlogs">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Categories</h5>
+                            <h2 class="card-text" id="totalCategories">0</h2>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Status Update Modal -->
-    <div class="modal fade" id="statusModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Blog Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="statusUpdateForm">
-                        <input type="hidden" id="blogId" name="blog_id">
-                        <div class="mb-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-select" id="status" name="status">
-                                <option value="0">Pending</option>
-                                <option value="1">Approved</option>
-                                <option value="2">Rejected</option>
-                            </select>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Blogs</h5>
+                            <h2 class="card-text" id="pendingBlogs">0</h2>
                         </div>
-                    </form>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="updateStatusBtn">Update Status</button>
+                <div class="col-md-4">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Rejected Blogs</h5>
+                            <h2 class="card-text" id="rejectedBlogs">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-secondary text-white">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Comments</h5>
+                            <h2 class="card-text" id="totalComments">0</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
+            
+         
         </div>
     </div>
 
+    
     <!-- Toast Message -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050">
         <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -87,91 +101,57 @@
 
     <?php include 'script.php'; ?>
     <script>
-        // Load blog posts
-        function loadBlogPosts() {
+        // Load dashboard statistics
+        function loadDashboardStats() {
+            console.log('Loading dashboard stats...'); // Debug log
             $.ajax({
-                url: '../../function/get_blogs.php',
+                url: '../function/get_dashboard_stats.php',
                 method: 'GET',
+                dataType: 'json', // Explicitly specify we expect JSON
                 success: function(response) {
-                    const blogs = JSON.parse(response);
-                    let html = '';
+                    console.log('Raw response:', response); // Debug log
                     
-                    blogs.forEach(blog => {
-                        const statusText = {
-                            '0': 'Pending',
-                            '1': 'Approved',
-                            '2': 'Rejected'
-                        }[blog.status] || 'Unknown';
-                        
-                        html += `
-                            <tr>
-                                <td>${blog.title}</td>
-                                <td>${blog.author_name}</td>
-                                <td>${blog.category_name}</td>
-                                <td><span class="badge bg-${getStatusColor(blog.status)}">${statusText}</span></td>
-                                <td>${new Date(blog.created_at).toLocaleDateString()}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" onclick="openStatusModal(${blog.id}, '${blog.status}')">
-                                        Update Status
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
+                    // Show debug information if available
+                    if (response.debug) {
+                        console.log('Debug information:', response.debug);
+                    }
+                    
+                    // Update each stat with null check
+                    $('#totalUsers').text(response.total_users || 0);
+                    $('#totalBlogs').text(response.total_blogs || 0);
+                    $('#totalCategories').text(response.total_categories || 0);
+                    $('#pendingBlogs').text(response.pending_blogs || 0);
+                    $('#rejectedBlogs').text(response.rejected_blogs || 0);
+                    $('#totalComments').text(response.total_comments || 0);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ajax error:', {
+                        status: status,
+                        error: error,
+                        response: xhr.responseText
                     });
-                    
-                    $('#blogList').html(html);
                 }
             });
         }
 
-        function getStatusColor(status) {
-            switch(status) {
-                case '0': return 'warning';
-                case '1': return 'success';
-                case '2': return 'danger';
-                default: return 'secondary';
-            }
+        // Make sure jQuery is loaded
+        if (typeof jQuery != 'undefined') {
+            console.log('jQuery is loaded');
+        } else {
+            console.error('jQuery is not loaded!');
         }
 
-        function openStatusModal(blogId, currentStatus) {
-            $('#blogId').val(blogId);
-            $('#status').val(currentStatus);
-            new bootstrap.Modal(document.getElementById('statusModal')).show();
-        }
-
-        // Update status
-        $('#updateStatusBtn').click(function() {
-            const formData = $('#statusUpdateForm').serialize();
-            
-            $.ajax({
-                url: '../../function/update_blog_status.php',
-                method: 'POST',
-                data: formData,
-                success: function(response) {
-                    const result = JSON.parse(response);
-                    const toast = new bootstrap.Toast(document.getElementById("toastMessage"));
-                    
-                    if (result.status === 1) {
-                        $('#toastMessage').removeClass('bg-danger').addClass('bg-success');
-                    } else {
-                        $('#toastMessage').removeClass('bg-success').addClass('bg-danger');
-                    }
-                    
-                    $('#toastBody').text(result.msg);
-                    toast.show();
-                    
-                    if (result.status === 1) {
-                        bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
-                        loadBlogPosts();
-                    }
-                }
-            });
-        });
-
-        // Load posts when page loads
+        // Load stats when document is ready
         $(document).ready(function() {
-            loadBlogPosts();
+            console.log('Document ready, loading stats...'); // Debug log
+            loadDashboardStats();
         });
+
+        // Also try loading stats after a short delay to ensure everything is loaded
+        setTimeout(function() {
+            console.log('Loading stats after delay...'); // Debug log
+            loadDashboardStats();
+        }, 1000);
     </script>
 </body>
 </html>

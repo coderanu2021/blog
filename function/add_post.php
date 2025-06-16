@@ -1,6 +1,7 @@
 <?php 
 session_start();
 require_once 'BaseManager.php';
+require_once 'config.php';
 
 $fileStatus = false;
 
@@ -13,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $photo    = $_FILES['image'] ?? null;
 
 
-    if (!$title || !$metaTitle || !$metaDesc || !$regPassword || !description || !category_id || !photo) {
+    if (!$title || !$metaTitle || !$metaDesc || !$description || !$category_id || !$photo) {
         echo json_encode(['status' => 0, 'msg' => 'All fields are required.']);
         exit;
     }
@@ -39,26 +40,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Create the new user
-    $insertResult = $userTable->create([
-        'user_id'=>$_SESSION['user_id'],
-        'title'          => $title,
-        'meta_title'         => $metaTitle,
-        'short_desc'      => $metaDesc,
-        'long_desc'      => $description,
+    // Create the new blog post
+    $blogTable = new BaseManager('tbl_blog');
+    $insertResult = $blogTable->create([
+        'user_id' => $_SESSION['user_id'],
+        'title' => $title,
+        'meta_title' => $metaTitle,
+        'short_desc' => $metaDesc,
+        'long_desc' => $description,
         'category_id' => $category_id,
-        'image' => $photoPath
-
-
+        'image' => $photoPath,
+        'status' => BLOG_STATUS_PENDING // Set initial status as pending
     ]);
 
     if ($insertResult) {
         $msg = $fileStatus 
-            ? "User registered successfully!" 
-            : "User registered, but photo upload failed.";
+            ? "Blog post submitted successfully! It will be reviewed by an admin." 
+            : "Blog post submitted, but photo upload failed.";
         echo json_encode(['status' => 1, 'msg' => $msg]);
     } else {
-        echo json_encode(['status' => 0, 'msg' => 'Failed to add Blog .']);
+        echo json_encode(['status' => 0, 'msg' => 'Failed to add blog post.']);
     }
 }
 ?>

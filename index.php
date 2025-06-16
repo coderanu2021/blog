@@ -7,7 +7,7 @@ $sql = "SELECT b.*, c.name as category_name, u.name as author_name
         FROM tbl_blog b 
         LEFT JOIN tbl_blog_category c ON b.category_id = c.id 
         LEFT JOIN tbl_user u ON b.user_id = u.id 
-        WHERE b.status = '1' 
+        WHERE b.status = " . BLOG_STATUS_APPROVED . "
         ORDER BY b.created_at DESC 
         LIMIT 6";
 $featured_posts = mysqli_query($conn, $sql);
@@ -34,7 +34,7 @@ $categories = mysqli_query($conn, $sql);
                 </div>
             </div>
             <div class="col-lg-6 fade-in">
-                <img src="assets/images/hero-image.jpg" alt="Blog Hero" class="img-fluid rounded-4 shadow-lg">
+                <img src="assets/images/blog/digital-marketing.jpg" alt="Blog Hero" class="img-fluid rounded-4 shadow-lg">
             </div>
         </div>
     </div>

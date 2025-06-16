@@ -1,3 +1,18 @@
+<?php
+require_once 'function/config.php';
+
+// Check if user is already logged in
+if (isset($_SESSION['user_id'])) {
+    // If user is admin, redirect to admin dashboard
+    if ($_SESSION['role'] === 'admin') {
+        header('Location: admin/dashboard.php');
+    } else {
+        // If regular user, redirect to home page
+        header('Location: index.php');
+    }
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

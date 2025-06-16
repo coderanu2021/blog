@@ -54,7 +54,7 @@ $categories = mysqli_query($conn, $sql);
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="profile.php">Profile</a></li>
-                                    <?php if($_SESSION['user_role'] == 'admin') { ?>
+                                    <?php if($_SESSION['role']) { ?>
                                         <li><a class="dropdown-item" href="admin/dashboard.php">Admin Panel</a></li>
                                     <?php } ?>
                                     <li><hr class="dropdown-divider"></li>
