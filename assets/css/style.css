@@ -67,6 +67,7 @@ body {
     color: var(--primary-color);
     border: none;
     transition: transform 0.3s ease;
+    width: 65%;
 }
 
 .hero-section .btn-primary:hover {
@@ -223,9 +224,9 @@ body {
 }
 
 /* Main Content Styles */
-.main-content {
+/* .main-content {
     padding: 2rem 0;
-}
+} */
 
 /* Blog Post Styles */
 .blog-post {

@@ -75,6 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Profile - MyPharmaRex Blog</title>
     <?php include 'head.php'; ?>
+    <style>
+        .content {
+    margin-left: 260px;
+}
+    </style>
 </head>
 <body>
     <?php include 'header.php'; ?>

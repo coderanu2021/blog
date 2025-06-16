@@ -71,6 +71,12 @@ function tableExists($conn, $table) {
                     <p>Users</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="profile.php" class="nav-link <?php echo $current_page == 'profile.php' ? 'active' : ''; ?>">
+                    <i class="nav-icon fas fa-user"></i>
+                    <p>Profile</p>
+                </a>
+            </li>
         </ul>
     </nav>
 </div>

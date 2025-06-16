@@ -1,5 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Discover Stories That Matter</title>
+    <?php include 'head.php'; ?>
+</head>
+<body>
 <?php
 require_once 'function/config.php';
+
 require_once 'header.php';
 
 // Get featured posts
@@ -146,3 +156,5 @@ document.querySelectorAll('.fade-in').forEach(element => {
 </script>
 
 <?php require_once 'footer.php'; ?>
+</body>
+</html>
