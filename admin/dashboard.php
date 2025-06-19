@@ -13,7 +13,7 @@ $admin = getAdminData();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - MyPharmaRex Blog</title>
+    <title>Admin Panel -  Blog</title>
     <?php include 'head.php'; ?>   
     <style>
         .content {
