@@ -1,4 +1,4 @@
-# MyPharmaRex Blog System
+# Blog System
 
 A modern, feature-rich blog system built with PHP that allows users to read, comment, and interact with blog posts across various categories. This project was developed individually as a personal project to demonstrate full-stack development skills.
 
